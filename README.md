@@ -17,5 +17,5 @@ rm install_scripts.sh
 
 ### The DIY way
 
-Either clone this repo (if you want to update those scripts easily) or download the archive to your folder of choice.
+Either clone this repo (if you want to update those scripts easily) or download then extract the archive to your folder of choice.
 Then add the folder to your PATH variable (in your `.bashrc`/`.zshrc`/config file for your cli of choice)
