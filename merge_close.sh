@@ -1,6 +1,6 @@
 parameters()
 {
-    echo 
+    echo
     echo This script is used to close and merge specific feature branch for ExGUI and 9200 dev-ticket
     echo Parameters:
     echo "-t/--ticket the ticket number (16XXX usually)"
@@ -41,7 +41,7 @@ done
 
 if [ "$machine" != "exc" ]; then
     if [ "$machine" != "9200" ]; then
-        echo "Wrong machine model param : $machine" 
+        echo "Wrong machine model param : $machine"
         parameters
     fi
 fi
@@ -55,7 +55,7 @@ branch_name="${dev_branch_name}-ticket-${ticket_num}"
 echo
 echo "Closing and merging feature branch (${branch_name})..."
 hg up $branch_name -C
-hg close-branch
+hg commit --close-branch -m "Close Branch"
 
 hg up $dev_branch_name -C
 hg merge $branch_name
