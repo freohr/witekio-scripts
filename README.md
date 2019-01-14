@@ -11,8 +11,10 @@ Download the `install_scripts.sh` and run it (`--help` will show you the paramet
 This will install the scripts in your home folder in their own `witekio_scripts` folder
 ```bash
 wget https://raw.githubusercontent.com/freohr/witekio-scripts/master/install_scripts.sh
-./install_scripts.sh -a -d ~
+chmod +x install_scripts.sh
+sudo ./install_scripts.sh -a -d ~
 rm install_scripts.sh
+source ~/.bashrc
 ```
 
 ### The DIY way
