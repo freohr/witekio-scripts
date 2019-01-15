@@ -57,7 +57,7 @@ else
     dev_branch_name="cv-${machine}-1.${sprint_num}-dev"
 fi
 
-branch_name="cv-${machine}-1.${sprint_num}-dev-ticket-${ticket_num}"
+feature_branch_name="cv-${machine}-1.${sprint_num}-dev-ticket-${ticket_num}"
 
 hg pull -u > /dev/stdout
 
@@ -73,13 +73,13 @@ if [ $? -ne 0 ]; then
     parameters
 fi
 
-hg branch ${branch_name}
+hg branch ${feature_branch_name}
 hg ci -m "Start of branch"
 
 hg phase -s -f
 
 if [ $? -eq 0 ]; then
     echo
-    echo "Branch \"${branch_name}\" created for ticket ${ticket_num}"
+    echo "Branch \"${feature_branch_name}\" created for ticket ${ticket_num}"
 fi
 
