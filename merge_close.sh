@@ -58,7 +58,7 @@ default_branch_name="cv-default-${machine}"
 dev_branch_name="cv-${machine}-1.${sprint_num}-dev"
 feature_branch_name="${dev_branch_name}-ticket-${ticket_num}"
 
-feature_commit_msg="Merge with ${feature_branch_name} / Fix \#${ticket_num}"
+feature_commit_msg="Merge with ${feature_branch_name} / Fix #${ticket_num}"
 
 echo
 echo "Closing and merging feature branch (${feature_branch_name})..."
