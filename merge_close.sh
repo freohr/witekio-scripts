@@ -100,6 +100,11 @@ fi
 
 hg push
 
-hg up ${dev_branch_name}
+if [ "$to_default" = true ]; then
+    hg up ${default_branch_name}
+else
+    hg up ${dev_branch_name}
+fi
+
 echo
 echo Working copy restored
