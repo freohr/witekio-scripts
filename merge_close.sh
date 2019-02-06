@@ -7,12 +7,14 @@ parameters()
     echo "-s/--sprint the sprint number (11, 12, etc.)"
     echo "-m/--machine the machine model (exc or 9200)"
     echo "--to-default: the feature branch must be directly merged into the default branch"
+    echo "--prevent-default: the development branch must NOT be merged into the default branch"
     echo -h/--help to show this message
     exit 1
 }
 
 output="default.patch"
 to_default=false
+prevent_default=false
 
 while [ $# -gt 0 ]
 do
@@ -36,6 +38,10 @@ do
             ;;
         --to-default)
             to_default=true
+            shift 1
+            ;;
+        --prevent-default)
+            prevent_default=true
             shift 1
             ;;
         *)
@@ -80,22 +86,25 @@ fi
 echo
 hg up $default_branch_name -C
 
-if [ "$to_default" = true ]; then
-    hg merge $feature_branch_name
-else
-    echo "Merging dev branch (${dev_branch_name}) in default branch..."
-    hg merge $dev_branch_name
-fi
+if [ "$prevent_default" = false ]; then
+    if [ "$to_default" = true ]; then
+        echo "Merging feature branch (${feature_branch_name}) in default branch..."
+        hg merge $feature_branch_name
+    else
+        echo "Merging dev branch (${dev_branch_name}) in default branch..."
+        hg merge $dev_branch_name
+    fi
 
-if [ ! $? -eq 0 ]; then
-    echo "There are merge conflicts, fix them and finish by hand"
-    exit 1
-fi
+    if [ ! $? -eq 0 ]; then
+        echo "There are merge conflicts, fix them and finish by hand"
+        exit 1
+    fi
 
-if [ "$to_default" = true ]; then
-    hg commit -m "$feature_commit_msg"
-else
-    hg commit -m "Merge with ${dev_branch_name}"
+    if [ "$to_default" = true ]; then
+        hg commit -m "$feature_commit_msg"
+    else
+        hg commit -m "Merge with ${dev_branch_name}"
+    fi
 fi
 
 hg push
