@@ -70,3 +70,5 @@ hg log -b "${branch_name}" -pg -v > ${output}.log
 if [ $? -eq 0 ]; then
     echo "Log extracted to ${output}.log, diff extracted to ${output}"
 fi
+
+kompare ${output} &
