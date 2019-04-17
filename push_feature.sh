@@ -47,18 +47,19 @@ fi
 hg pull -u
 
 default_branch_name="cv-default-${machine}"
-feature_branch_name="cv-${machine}-1.${sprint_num}-dev-ticket-${ticket_num}"
+dev_branch_name="cv-${machine}-1.${sprint_num}-dev"
+feature_branch_name="${dev_branch_name}-ticket-${ticket_num}"
 
 # TODO (sfa) : Eventually, rebase the feature branch on top of the latest dev
 hg up $feature_branch_name -C
-hg merge $default_branch_name --tool :merge
+hg merge $dev_branch_name --tool :merge
 
 if [ ! $? -eq 0 ]; then
     echo "There are merge conflicts, fix them and finish by hand"
     exit 1
 fi
 
-hg commit -m "Merge with ${default_branch_name}"
+hg commit -m "Merge with ${dev_branch_name}"
 
 hg phase -d
 
@@ -66,5 +67,3 @@ hg push --new-branch
 
 echo "Opening pull request Form"
 firefox "http://redminenw.nw.net/projects/rosega/boards/6?sort=replies%2Cupdated_on%3Adesc" &
-
-echo "cv-nwplatform ${feature_branch_name}" | xclip -i

@@ -6,10 +6,12 @@ parameters()
     echo Parameters:
     echo "-t/--ticket the ticket number (14XXX usually)"
     echo "-s/--sprint the sprint number (11, 12, etc.)"
+    echo "--from-default force the feature branch to start from the default branch"
     echo "-m/--machine the machine model (exc or 9200)"
     echo -h/--help to show this message
     exit 1
 }
+
 
 while [ $# -gt 0 ]
 do
@@ -31,6 +33,10 @@ do
             machine=$2
             shift 2
             ;;
+        --from-default)
+            from_default=true
+            shift
+            ;;
         *)
             echo Parametre {$1} inconnu
             parameters
@@ -45,7 +51,12 @@ if [ "$machine" != "exc" ]; then
     fi
 fi
 
-dev_branch_name="cv-default-${machine}"
+if [ "$from_default" = true ]; then
+    dev_branch_name="cv-default-${machine}"
+else
+    dev_branch_name="cv-${machine}-1.${sprint_num}-dev"
+fi
+
 feature_branch_name="cv-${machine}-1.${sprint_num}-dev-ticket-${ticket_num}"
 
 hg pull -u > /dev/stdout
