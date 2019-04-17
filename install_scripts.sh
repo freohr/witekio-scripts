@@ -14,6 +14,12 @@ parameters()
     exit 1
 }
 
+if [ $# -le 0 ]
+then
+    echo "nothing to do"
+    parameters
+fi
+
 while [ $# -gt 0 ]
 do
     key=$1

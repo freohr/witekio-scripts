@@ -12,6 +12,12 @@ parameters()
     exit 1
 }
 
+if [ $# -le 0 ]
+then
+    echo "nothing to do"
+    parameters
+fi
+
 output="default.patch"
 to_default=false
 prevent_default=false

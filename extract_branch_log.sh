@@ -13,6 +13,12 @@ parameters()
     exit 1
 }
 
+if [ $# -le 0 ]
+then
+    echo "nothing to do"
+    parameters
+fi
+
 output="default.patch"
 
 while [ $# -gt 0 ]
