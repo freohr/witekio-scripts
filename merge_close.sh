@@ -3,11 +3,7 @@ parameters()
     echo
     echo This script is used to close and merge specific feature branch for ExGUI and 9200 dev-ticket
     echo Parameters:
-    echo "-t/--ticket the ticket number (16XXX usually)"
-    echo "-s/--sprint the sprint number (11, 12, etc.)"
-    echo "-m/--machine the machine model (exc or 9200)"
-    echo "--to-default: the feature branch must be directly merged into the default branch"
-    echo "--prevent-default: the development branch must NOT be merged into the default branch"
+    echo "-b/--branch the feature branch to push"
     echo -h/--help to show this message
     exit 1
 }
@@ -18,10 +14,6 @@ then
     parameters
 fi
 
-output="default.patch"
-to_default=false
-prevent_default=false
-
 while [ $# -gt 0 ]
 do
     key=$1
@@ -30,25 +22,9 @@ do
         -h|--help)
             parameters
             ;;
-        -t|--ticket)
-            ticket_num=$2
+        -b|--branch)
+            feature_branch_name=$2
             shift 2
-            ;;
-        -s|--sprint)
-            sprint_num=$2
-            shift 2
-            ;;
-        -m|--machine)
-            machine=$2
-            shift 2
-            ;;
-        --to-default)
-            to_default=true
-            shift 1
-            ;;
-        --prevent-default)
-            prevent_default=true
-            shift 1
             ;;
         *)
             echo Parametre {$1} inconnu
@@ -57,69 +33,40 @@ do
     esac
 done
 
-if [ "$machine" != "exc" ]; then
-    if [ "$machine" != "9200" ]; then
-        echo "Wrong machine model param : $machine"
-        parameters
-    fi
-fi
-
+# Update the repo, then check if the branches exist
 hg pull -u
 
-default_branch_name="cv-default-${machine}"
-dev_branch_name="cv-${machine}-1.${sprint_num}-dev"
-feature_branch_name="${dev_branch_name}-ticket-${ticket_num}"
+hg branches -c | grep -P "^${feature_branch_name}\s+" > /dev/null
+if [ $? -eq 1 ]; then
+    echo The branch "$feature_branch_name" doesn\'t exist
+    parameters
+fi
 
-feature_commit_msg="Merge with ${feature_branch_name} / Fix #${ticket_num}"
+base_branch_name=$(expr "${feature_branch_name}" : "\(.*\)-ticket-.*")
 
-echo
-echo "Closing and merging feature branch (${feature_branch_name})..."
+hg branches -c | grep -P "^${base_branch_name}\s+" > /dev/null
+if [ $? -eq 1 ]; then
+    echo The branch "$base_branch_name" doesn\'t exist
+    parameters
+fi
+
+# Close the feature branch
 hg up $feature_branch_name -C
 hg commit --close-branch -m "Close Branch"
 
-if [ "$to_default" = false ]; then
-    hg up $dev_branch_name -C
-    hg merge $feature_branch_name
+# Merge with the base branch
+hg up $base_branch_name
+hg merge $feature_branch_name --tool :merge
 
-    if [ ! $? -eq 0 ]; then
-        echo "There are merge conflicts, fix them and finish by hand"
-        exit 1
-    fi
+ticket_num=$(expr "${feature_branch_name}" : ".*-ticket-\(.*\)")
+feature_commit_msg="Merge with ${feature_branch_name} / Fix #${ticket_num}"
 
-    hg commit -m "$feature_commit_msg"
-fi
+hg commit -m "${feature_commit_msg}"
 
-echo
-hg up $default_branch_name -C
-
-if [ "$prevent_default" = false ]; then
-    if [ "$to_default" = true ]; then
-        echo "Merging feature branch (${feature_branch_name}) in default branch..."
-        hg merge $feature_branch_name
-    else
-        echo "Merging dev branch (${dev_branch_name}) in default branch..."
-        hg merge $dev_branch_name
-    fi
-
-    if [ ! $? -eq 0 ]; then
-        echo "There are merge conflicts, fix them and finish by hand"
-        exit 1
-    fi
-
-    if [ "$to_default" = true ]; then
-        hg commit -m "$feature_commit_msg"
-    else
-        hg commit -m "Merge with ${dev_branch_name}"
-    fi
-fi
+echo "Build this merge, then push if it works"
+exit 0
 
 hg push
-
-if [ "$to_default" = true ]; then
-    hg up ${default_branch_name}
-else
-    hg up ${dev_branch_name}
-fi
-
+hg up $base_branch_name
 echo
 echo Working copy restored
